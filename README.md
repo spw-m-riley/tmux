@@ -17,22 +17,21 @@ This repository contains a single `.tmux.conf` focused on fast pane/session navi
 
 Configured through TPM-compatible plugin declarations:
 
-- `catppuccin/tmux`
-- `christoomey/vim-tmux-navigator`
-- `tmux-plugins/tmux-prefix-highlight`
-- `sainnhe/tmux-fzf`
-- `tmux-plugins/tmux-copycat`
-- `laktak/extrakto`
-- `tmux-plugins/tmux-open`
-- `tmux-plugins/tmux-yank`
-- `tmux-plugins/tmux-battery`
-- `tmux-plugins/tmux-cpu`
+- `catppuccin/tmux`: theme and status modules
+- `christoomey/vim-tmux-navigator`: pane navigation between tmux and Vim
+- `tmux-plugins/tmux-prefix-highlight`: active prefix indicator
+- `sainnhe/tmux-fzf`: fuzzy launcher/switcher workflows
+- `tmux-plugins/tmux-copycat`: pane text search helpers
+- `laktak/extrakto`: extract/select text from pane output
+- `tmux-plugins/tmux-open`: open file paths and URLs
+- `tmux-plugins/tmux-yank`: improved copy-to-system-clipboard behavior
+- `tmux-plugins/tmux-battery`: battery status module
+- `tmux-plugins/tmux-cpu`: CPU/memory status module
 
 ## Prerequisites
 
 - tmux (3.2+ recommended)
 - `git`
-- `bc` (used by the version check for clipboard behavior)
 - `fzf` (recommended for best `tmux-fzf` experience)
 
 ## Install and use
@@ -87,6 +86,7 @@ Configured through TPM-compatible plugin declarations:
 - `prefix + c`: new window in current path
 - `prefix + s`: session switcher (`tmux-fzf` script if available, else `choose-tree -s`)
 - `prefix + S`: session chooser/launcher (`tmux-fzf` script if available, else `choose-tree -s`)
+- `prefix + f`: launch `tmux-fzf` (via `TMUX_FZF_LAUNCH_KEY`)
 - `prefix + P`: paste buffer
 
 ### Copy-mode (vi)
@@ -96,6 +96,56 @@ Configured through TPM-compatible plugin declarations:
 - `y`: copy selection and exit copy-mode
 - `Esc` or `Ctrl-s`: cancel copy-mode
 - `Ctrl-h/j/k/l`: move to neighboring panes while in copy-mode
+
+## Configuration reference
+
+This section maps directly to `.tmux.conf` so edits are safer and easier to review.
+
+### Bootstrap and environment
+
+- `TMUX_PLUGIN_MANAGER_PATH` is set to `~/.tmux/plugins`.
+- Plugin manager entrypoint is fixed at `~/.tmux/plugins/tpm-redux/tpm`.
+- `update-environment` whitelists `DISPLAY`, SSH agent variables, `XAUTHORITY`, and `PATH` so attached clients inherit needed env.
+
+### Interaction model
+
+- Dual-prefix behavior:
+  - primary prefix: `Ctrl-a`
+  - secondary prefix: `Ctrl-b`
+  - both have explicit `send-prefix` bindings.
+- Path-aware commands preserve cwd context:
+  - splits (`prefix + \`, `prefix + -`, `prefix + t`)
+  - new windows (`prefix + c`)
+- Session switching keeps a resilient fallback:
+  - use `tmux-fzf` session script when present
+  - fallback to built-in `choose-tree -s` when absent.
+- Copy mode is vi-based (`mode-keys vi`) with custom selection (`v`, `Ctrl-v`, `y`) and pane-nav bindings in copy-mode.
+
+### Plugins and plugin-specific wiring
+
+- Plugins are declared with `set -g @plugin ...` for TPM management.
+- Catppuccin status uses:
+  - `set -gF status-right` for base modules
+  - `set -agF status-right` for appended modules (`cpu`, `battery`)
+  - `status-position top` and rounded window style options.
+- `tmux-fzf` behavior is controlled through:
+  - `TMUX_FZF_LAUNCH_KEY="f"`
+  - `TMUX_FZF_OPTIONS` popup sizing and prompt/pointer styling.
+- Extrakto popup behavior is set with:
+  - `@extrakto_split_direction "p"`
+  - `@extrakto_popup_size "75%,90%"`.
+
+### Compatibility and runtime toggles
+
+- Terminal defaults choose `tmux-256color` when available, else `xterm-256color`.
+- Truecolor and undercurl/underline color escape sequences are enabled via `terminal-overrides`.
+- `set-clipboard on` is enabled only on tmux `>= 3.2` (version-gated with tmux's built-in format comparison).
+
+### Validate config after edits
+
+```bash
+tmux -L copilot-check -f "$PWD/.tmux.conf" new-session -d -s copilot-check && tmux -L copilot-check kill-server
+```
 
 ## Daily workflow quick start
 
