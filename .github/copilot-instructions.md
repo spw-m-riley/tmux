@@ -26,6 +26,10 @@
 - For session switching keys (`s`/`S`), keep the `tmux-fzf` script existence check with `choose-tree -s` fallback.
 - Keep Catppuccin status composition pattern (`set -gF status-right` followed by `set -agF status-right`) so plugin modules append correctly.
 - When keybindings, plugin list, or install path changes in `.tmux.conf`, update `README.md` in the same change.
+- **TMUX_FZF_OPTIONS whitespace**: Never use plain ASCII spaces as visual padding inside `TMUX_FZF_OPTIONS` string values (e.g., in `--prompt` or `--pointer`); they split fzf argument parsing. Use Unicode thin-space (U+2009) for visual padding in prompt/pointer strings.
+- **Version comparisons**: Use tmux built-in format arithmetic (`#{>=:#{version},X.Y}`) for version gates. Never introduce a `bc` shell dependency.
+- **fzf popup geometry**: All fzf-based popups (tmux-fzf via `TMUX_FZF_OPTIONS`, extrakto via `@extrakto_popup_size`) must use matching geometry (75%×90%) for visual consistency.
+- **No redundant session pickers**: Do not suggest or add session-specific fuzzy pickers (e.g., tmux-sessionx). `tmux-fzf` is the designated fuzzy launcher for all panes/windows/sessions/commands; verify any new plugin doesn't duplicate its function.
 
 ## MCP server guidance
 
