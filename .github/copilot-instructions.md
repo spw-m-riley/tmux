@@ -5,6 +5,7 @@
 - There is no build system, lint configuration, or automated test suite in this repository.
 - Config validation smoke check:
   - `tmux -L copilot-check -f "$PWD/.tmux.conf" new-session -d -s copilot-check && tmux -L copilot-check kill-server`
+- After any `.tmux.conf` edit, run the smoke check above rather than a bare `start-server` so the temporary tmux server is cleaned up in the same command.
 - Single-test command: not applicable (no test framework is configured).
 
 ## High-level architecture
@@ -25,13 +26,16 @@
 - Preserve dual-prefix behavior (`C-a` primary, `C-b` secondary) and both send-prefix bindings.
 - For session switching keys (`s`/`S`), keep the `tmux-fzf` script existence check with `choose-tree -s` fallback.
 - Keep Catppuccin status composition pattern (`set -gF status-right` followed by `set -agF status-right`) so plugin modules append correctly.
-- When keybindings, plugin list, install path, or any plugin-specific options change in `.tmux.conf`, update `README.md` in the same change.
+- When keybindings, plugin list or roles, install path, or any plugin-specific options change in `.tmux.conf`, update both `README.md` and `.github/copilot-instructions.md` in the same change.
 - **TMUX_FZF_OPTIONS whitespace**: Never use plain ASCII spaces as visual padding inside `TMUX_FZF_OPTIONS` string values (e.g., in `--prompt` or `--pointer`); they split fzf argument parsing. Use Unicode thin-space (U+2009) for visual padding in prompt/pointer strings.
 - **Version comparisons**: Use tmux built-in format arithmetic (`#{>=:#{version},X.Y}`) for version gates. Never introduce a `bc` shell dependency.
 - **fzf popup geometry**: All fzf-based popups (tmux-fzf via `TMUX_FZF_OPTIONS`, extrakto via `@extrakto_popup_size`) must use matching geometry (75%×90%) for visual consistency.
-- **No redundant session pickers**: Do not suggest or add session-specific fuzzy pickers (e.g., tmux-sessionx). `tmux-fzf` is the designated fuzzy launcher for all panes/windows/sessions/commands; verify any new plugin doesn't duplicate its function.
+- **Current plugin source of truth**: If `README.md` or `.github/copilot-instructions.md` drift from the live config, trust the `set -g @plugin ...` lines and adjacent plugin settings in `.tmux.conf`, then bring the docs back into sync.
+- **No redundant session pickers**: Do not suggest or add session-specific fuzzy pickers (e.g., tmux-sessionx). `tmux-fzf` is the primary fuzzy launcher for panes/windows/sessions/commands; verify any new plugin does not duplicate that role.
 - **Keybinding conflicts**: Before assigning any `bind`/`bind-key` or `@*-bind`/`@*-key` value, grep `.tmux.conf` for existing uses of that key combo to avoid silent conflicts.
-- **Active plugins**: `tmux-sensible` is excluded. Currently loaded plugins: catppuccin/tmux, vim-tmux-navigator, tmux-fzf, tmux-open, tmux-yank, extrakto, tmux-logging, tmux-battery, tmux-cpu. `extrakto` is the fzf text picker (`prefix + Tab`); do not suggest or add `tmux-copycat` — extrakto supersedes it.
+- **Plugin defaults matter**: Do not assume a plugin is unused just because there is no explicit local `bind-key`. This repo relies on plugin defaults and env-driven bindings too (for example `TMUX_FZF_LAUNCH_KEY="f"` for tmux-fzf); check the README and plugin defaults before pruning or replacing a plugin.
+- **Active plugins**: `tmux-sensible` is excluded. Current plugins in `.tmux.conf`: catppuccin/tmux, christoomey/vim-tmux-navigator, tmux-prefix-highlight, sainnhe/tmux-fzf, tmux-copycat, laktak/extrakto, tmux-open, tmux-yank, tmux-battery, tmux-cpu.
+- **Fuzzy/search overlap checks**: This config already combines `tmux-fzf` (launcher), `tmux-copycat` (copy-mode regex search/jump), and `extrakto` (fzf text extraction on `prefix + Tab`). Before suggesting or adding another fuzzy/search plugin, compare it against those roles and justify any overlap explicitly.
 
 ## MCP server guidance
 

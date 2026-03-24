@@ -15,7 +15,7 @@ This repository contains a single `.tmux.conf` focused on fast pane/session navi
 
 ## Included plugins
 
-Configured through TPM-compatible plugin declarations:
+Configured through `tpack`'s TPM-compatible plugin declarations:
 
 - `catppuccin/tmux`: theme and status modules
 - `christoomey/vim-tmux-navigator`: pane navigation between tmux and Vim
@@ -42,10 +42,10 @@ Configured through TPM-compatible plugin declarations:
    cp .tmux.conf ~/.tmux.conf
    ```
 
-2. Install TPM in the path expected by this config (`~/.tmux/plugins/tpm-redux/tpm`):
+2. Install `tpack` in the path expected by this config (`~/.tmux/plugins/tpm/tpm`):
 
    ```bash
-   git clone https://github.com/tmux-plugins/tpm ~/.tmux/plugins/tpm-redux
+   git clone https://github.com/tmuxpack/tpack ~/.tmux/plugins/tpm
    ```
 
 3. Start tmux:
@@ -104,7 +104,7 @@ This section maps directly to `.tmux.conf` so edits are safer and easier to revi
 ### Bootstrap and environment
 
 - `TMUX_PLUGIN_MANAGER_PATH` is set to `~/.tmux/plugins`.
-- Plugin manager entrypoint is fixed at `~/.tmux/plugins/tpm-redux/tpm`.
+- Plugin manager entrypoint is fixed at `~/.tmux/plugins/tpm/tpm`.
 - `update-environment` whitelists `DISPLAY`, SSH agent variables, `XAUTHORITY`, and `PATH` so attached clients inherit needed env.
 
 ### Interaction model
